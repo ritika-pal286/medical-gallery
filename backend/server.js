@@ -25,8 +25,8 @@ app.get("/", (req, res) => {
 });
 
 // ✅ routes
-app.use("/api/auth", authRoutes);
-app.use("/api/files", fileRoutes);
+app.use("/api/auth/", authRoutes);
+app.use("/api/files/", fileRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error("Unhandled API error:", err);
