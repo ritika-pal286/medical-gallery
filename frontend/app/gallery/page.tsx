@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { apiUrl } from "../../lib/api";
 
 type GalleryFile = {
   _id: string;
@@ -27,7 +28,7 @@ export default function Gallery() {
     setErrorMessage("");
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/files", {
+      const res = await fetch(apiUrl("/api/files"), {
         cache: "no-store", // 🔥 important
       });
 
@@ -83,7 +84,7 @@ export default function Gallery() {
         return;
       }
 
-      const response = await fetch(`http://127.0.0.1:8000/api/files/${id}`, {
+      const response = await fetch(apiUrl(`/api/files/${id}`), {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

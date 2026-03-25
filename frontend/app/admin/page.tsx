@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { apiUrl } from "../../lib/api";
 
 export default function Admin() {
   const [title, setTitle] = useState("");
@@ -25,7 +26,7 @@ export default function Admin() {
 
     const checkAuth = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/auth/verify", {
+        const response = await fetch(apiUrl("/api/auth/verify"), {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -71,7 +72,7 @@ export default function Admin() {
         return;
       }
 
-      const res = await fetch("http://127.0.0.1:8000/api/files/upload", {
+      const res = await fetch(apiUrl("/api/files/upload"), {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
