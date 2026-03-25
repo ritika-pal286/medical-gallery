@@ -6,9 +6,16 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiUrl } from "../../lib/api";
 
+const CATEGORY_OPTIONS = [
+  "Radiology",
+  "Cardiology",
+  "Neurology",
+  "Orthopedics",
+];
+
 export default function Admin() {
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(CATEGORY_OPTIONS[0]);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [isAuthChecked, setIsAuthChecked] = useState(false);
@@ -148,13 +155,18 @@ export default function Admin() {
 
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-700">Category</label>
-            <input
-              placeholder="e.g. Radiology"
+            <select
               disabled={loading}
               className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 focus:ring-4 focus:ring-cyan-100"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-            />
+            >
+              {CATEGORY_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

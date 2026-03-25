@@ -1,6 +1,10 @@
 const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
-export const API_BASE_URL = (rawBaseUrl || "http://127.0.0.1:8000").replace(/\/$/, "");
+if (!rawBaseUrl) {
+  throw new Error("NEXT_PUBLIC_API_URL is not defined");
+}
+
+export const API_BASE_URL = rawBaseUrl.replace(/\/$/, "");
 
 export const apiUrl = (path: string) => {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;

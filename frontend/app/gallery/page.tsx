@@ -122,8 +122,14 @@ export default function Gallery() {
   };
 
   const categories = useMemo(() => {
-    const uniqueCategories = new Set(files.map((file) => file.category).filter(Boolean));
-    return ["All", ...Array.from(uniqueCategories)];
+    const categoryMap = new Map<string, number>();
+
+    files.forEach((file) => {
+      if (!file.category) return;
+      categoryMap.set(file.category, (categoryMap.get(file.category) || 0) + 1);
+    });
+
+    return Array.from(categoryMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
   }, [files]);
 
   const filteredFiles = useMemo(() => {
@@ -137,6 +143,23 @@ export default function Gallery() {
       return matchesTitle && matchesCategory;
     });
   }, [files, searchTerm, selectedCategory]);
+
+  const hasActiveFilters = searchTerm.trim().length > 0 || selectedCategory !== "All";
+
+  const getCategoryBadgeClasses = (category: string) => {
+    switch (category) {
+      case "Radiology":
+        return "bg-cyan-50 text-cyan-700 ring-cyan-200";
+      case "Cardiology":
+        return "bg-rose-50 text-rose-700 ring-rose-200";
+      case "Neurology":
+        return "bg-indigo-50 text-indigo-700 ring-indigo-200";
+      case "Orthopedics":
+        return "bg-emerald-50 text-emerald-700 ring-emerald-200";
+      default:
+        return "bg-slate-100 text-slate-700 ring-slate-200";
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -154,7 +177,7 @@ export default function Gallery() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-4">
         <div className="md:col-span-2">
           <label className="mb-2 block text-sm font-medium text-slate-700">Search by title</label>
           <input
@@ -172,12 +195,26 @@ export default function Gallery() {
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-cyan-400 focus:ring-4 focus:ring-cyan-100"
           >
-            {categories.map((category) => (
+            <option value="All">All Categories ({files.length})</option>
+            {categories.map(([category, count]) => (
               <option key={category} value={category}>
-                {category}
+                {category} ({count})
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="flex items-end">
+          <button
+            type="button"
+            onClick={() => {
+              setSearchTerm("");
+              setSelectedCategory("All");
+            }}
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          >
+            Reset Filters
+          </button>
         </div>
       </div>
 
@@ -190,15 +227,30 @@ export default function Gallery() {
           {errorMessage}
         </div>
       ) : filteredFiles.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
-          No files found for current search/filter.
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+          <p className="text-base font-semibold text-slate-700">No results found</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Try changing search text or selecting a different category.
+          </p>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedCategory("All");
+              }}
+              className="mt-4 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              Clear Filters
+            </button>
+          )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredFiles.map((file) => (
             <div
               key={file._id}
-              className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
             >
               {brokenImages[file._id] ? (
                 <button
@@ -217,12 +269,16 @@ export default function Gallery() {
                 />
               )}
 
-              <div className="space-y-3 p-4">
+              <div className="space-y-4 p-4">
                 <div className="flex items-start justify-between gap-2">
-                  <h2 className="line-clamp-2 text-base font-semibold text-slate-900">
+                  <h2 className="line-clamp-2 text-base font-semibold leading-6 text-slate-900">
                     {file.title}
                   </h2>
-                  <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${getCategoryBadgeClasses(
+                      file.category
+                    )}`}
+                  >
                     {file.category}
                   </span>
                 </div>
